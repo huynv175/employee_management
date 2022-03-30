@@ -1,0 +1,46 @@
+version: "3.3"
+
+services:
+    goservice:
+        depends_on:
+            -   db
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            -   ./data:/data
+        ports:
+            -   "8080:8080"
+        restart: always
+        networks:
+            - mynet
+        container_name: goservice
+        environment:
+            - DBUSER=root
+            - DBPASS=password
+            - DBADDRESS=dbhost:3306
+            - DBNET=tcp
+            - DBNAME=dbsystem
+
+    db:
+        image: mysql:8.0
+        container_name: db-system
+        hostname: dbhost
+        ports:
+            - "3360:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=password
+
+        volumes:
+            - data-volumes:/var/lib/mysql
+            - ./data:/docker-entrypoint-initdb.d
+        restart: always
+        networks:
+            - mynet
+
+volumes:
+    data-volumes:
+
+networks:
+    mynet:
+        driver: bridge
